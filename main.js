@@ -10,7 +10,7 @@ const canvas=document.querySelector('.canvas')
 const renderer = new THREE.WebGLRenderer({canvas:canvas});
 const loader = new GLTFLoader();
 
-loader.load( './models/sci-fi_spaceship_bridge.glb', function ( gltf ) {
+loader.load( './models/sci-fi_spaceship_bridge.glb', function ( gltf ){
 
 	scene.add( gltf.scene );
 
