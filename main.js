@@ -15,11 +15,58 @@ loader.load('./models/sci-fi_spaceship_bridge.glb', function (gltf) {
     console.error(error);
 });
 
-loader.load('./models/hologram.glb', function (gltf) {
-    scene.add(gltf.scene);
-}, undefined, function (error) {
-    console.error(error);
+// EARTH
+const earthDayTexture = new THREE.TextureLoader().load('./earth_day_texture.jpg');
+const earthNightTexture = new THREE.TextureLoader().load('./earth_night_texture.jpg');
+const earthRadius = 0.8;
+const earthSegments = 32;
+const earthGeometry = new THREE.SphereGeometry(earthRadius, earthSegments, earthSegments);
+const earthMaterial = new THREE.MeshBasicMaterial({ map: earthDayTexture });
+const earthSphere = new THREE.Mesh(earthGeometry, earthMaterial);
+earthSphere.position.x = 0;
+earthSphere.position.y=1;
+scene.add(earthSphere);
+
+let isEarthHovered = false;
+
+document.addEventListener('mousemove', function (event) {
+    const mouse = {
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1
+    };
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(earthSphere);
+
+    if (intersects.length > 0) {
+        isEarthHovered = true;
+    } else {
+        isEarthHovered = false;
+    }
 });
+
+function earthRotation() {
+    if (isEarthHovered) {
+        earthSphere.rotation.y += 0.05;
+    }
+}
+
+// Function to switch Earth texture between day and night based on the time of day
+function updateEarthTexture() {
+    const now = new Date();
+    const hours = now.getHours();
+    const isDaytime = hours >= 6 && hours < 18;
+
+    if (isDaytime) {
+        earthSphere.material.map = earthDayTexture;
+    } else {
+        earthSphere.material.map = earthNightTexture;
+    }
+}
+
+
+
 
 const marsTexture = new THREE.TextureLoader().load('./mars_texture.jpg');
 const marsRadius = 0.5;
@@ -83,7 +130,7 @@ document.addEventListener('mousemove', function (event) {
     } else {
         isMoonHovered = false;
     }
-});
+});	
 
 function moonRotation() {
     if (isMoonHovered) {
@@ -122,11 +169,14 @@ document.addEventListener('click', function (event) {
     }
 });
 
+
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    marsRotation();
-	moonRotation();
+    updateEarthTexture(); 
+    earthRotation();
+    moonRotation();
+	marsRotation();
     renderer.render(scene, camera);
 }
 
