@@ -84,11 +84,11 @@ document.addEventListener('mousemove', function (event) {
 let motionlock=0;
 document.addEventListener('click', function (event) {
     if (isEarthHovered&&!motionlock) {
-        window.open('earth_experience.html', '_blank');
+        window.open('../public/pages/earth_experience.html', '_blank');
     } else if (isMarsHovered&&!motionlock) {
-        window.open('mars_experience.html', '_blank');
+        window.open('../public/pages/mars_experience.html', '_blank');
     } else if (isMoonHovered&&!motionlock) {
-        window.open('moon_experience.html', '_blank');
+        window.open('../public/pages/moon_experience.html', '_blank');
     }
 });
 
@@ -242,11 +242,11 @@ async function setupCamera() {
                 console.log('Fist detected - Proceeding');
 
                 if (selectedPlanet === 'earth') {
-                    window.open('earth_experience.html', '_blank');
+                    window.open('../public/pages/earth_experience.html', '_blank');
                 } else if (selectedPlanet === 'moon') {
-                    window.open('moon_experience.html', '_blank');
+                    window.open('../public/pages/moon_experience.html', '_blank');
                 } else if (selectedPlanet === 'mars') {
-                    window.open('mars_experience.html', '_blank');
+                    window.open('../public/pages/mars_experience.html', '_blank');
                 }
 
                 lastTabOpenTime = currentTime;
