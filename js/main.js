@@ -83,11 +83,11 @@ document.addEventListener('mousemove', function (event) {
 });
 let motionlock=0;
 document.addEventListener('click', function (event) {
-    if (isEarthHovered) {
+    if (isEarthHovered&&!motionlock) {
         window.open('earth_experience.html', '_blank');
-    } else if (isMarsHovered) {
+    } else if (isMarsHovered&&!motionlock) {
         window.open('mars_experience.html', '_blank');
-    } else if (isMoonHovered) {
+    } else if (isMoonHovered&&!motionlock) {
         window.open('moon_experience.html', '_blank');
     }
 });
@@ -132,7 +132,7 @@ async function setupCamera() {
   async function loadHandposeModel() {
       return await handpose.load();
   }
-
+  let lastTabOpenTime = 0;
 //   let isEarthHovered1=1;
 //   let isMarsHovered1=0;
 //   let isMoonHovered1=0;
@@ -152,7 +152,7 @@ async function setupCamera() {
       video.height = window.innerHeight;
       canvas1.width=video.width;
       canvas1.height=video.height;
-  
+        let isFist;
       const predictions = await model.estimateHands(video);
         
       context.clearRect(0, 0, canvas1.width, canvas1.height);
@@ -160,7 +160,7 @@ async function setupCamera() {
       if (predictions.length > 0) {
           for (const hand of predictions) {
               const landmarks = hand.landmarks;
-  
+
               
               context.fillStyle = 'white';
               context.strokeStyle = 'white';
@@ -192,7 +192,10 @@ async function setupCamera() {
                   context.arc(x, y, 3, 0, 3 * Math.PI);
                   context.fill();
                 }
-  
+                
+                    isFist = isFistGesture(landmarks);
+
+                
               
           }
       }
@@ -230,9 +233,53 @@ async function setupCamera() {
         }
         previousX = x;
     }
+    
+
+        if (isFist) {
+            const currentTime = Date.now();
+
+            if (currentTime - lastTabOpenTime > 5000) { 
+                console.log('Fist detected - Proceeding');
+
+                if (selectedPlanet === 'earth') {
+                    window.open('earth_experience.html', '_blank');
+                } else if (selectedPlanet === 'moon') {
+                    window.open('moon_experience.html', '_blank');
+                } else if (selectedPlanet === 'mars') {
+                    window.open('mars_experience.html', '_blank');
+                }
+
+                lastTabOpenTime = currentTime;
+            }
+        }
+    
   
       requestAnimationFrame(() => detectHands(video, model));
   }
+
+  function isFistGesture(landmarks) {
+  
+    const palmCenter = landmarks[0];
+    const fingertipDistances = landmarks
+        .slice(1)
+        .map(fingertip => calculateDistance(fingertip, palmCenter));
+   
+    const averageDistance = fingertipDistances.reduce((a, b) => a + b, 0) / fingertipDistances.length;
+
+    const fistThreshold = 50;
+    if(averageDistance < fistThreshold && landmarks[0][2]<5)
+    return true
+    else
+    return false;
+}
+
+function calculateDistance(point1, point2) {
+    const dx = point1[0] - point2[0];
+    const dy = point1[1] - point2[1];
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+
   
   async function run() {
     try {
