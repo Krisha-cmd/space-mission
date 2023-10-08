@@ -9,134 +9,45 @@ const canvas = document.querySelector('.canvas');
 const renderer = new THREE.WebGLRenderer({ canvas: canvas });
 const loader = new GLTFLoader();
 
+let earthSphere, marsSphere, moonSphere;
+let isEarthHovered = false;
+let isMarsHovered = false;
+let isMoonHovered = false;
+
 loader.load('./models/sci-fi_spaceship_bridge.glb', function (gltf) {
     scene.add(gltf.scene);
 }, undefined, function (error) {
     console.error(error);
 });
 
-// EARTH
 const earthDayTexture = new THREE.TextureLoader().load('../images/earth_day_texture.jpg');
 const earthNightTexture = new THREE.TextureLoader().load('../images/earth_night_texture.jpg');
 const earthRadius = 0.8;
 const earthSegments = 32;
 const earthGeometry = new THREE.SphereGeometry(earthRadius, earthSegments, earthSegments);
 const earthMaterial = new THREE.MeshBasicMaterial({ map: earthDayTexture });
-const earthSphere = new THREE.Mesh(earthGeometry, earthMaterial);
+earthSphere = new THREE.Mesh(earthGeometry, earthMaterial);
 earthSphere.position.x = 0;
-earthSphere.position.y=1;
+earthSphere.position.y = 1;
 scene.add(earthSphere);
-
-let isEarthHovered = false;
-
-document.addEventListener('mousemove', function (event) {
-    const mouse = {
-        x: (event.clientX / window.innerWidth) * 2 - 1,
-        y: -(event.clientY / window.innerHeight) * 2 + 1
-    };
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(earthSphere);
-
-    if (intersects.length > 0) {
-        isEarthHovered = true;
-    } else {
-        isEarthHovered = false;
-    }
-});
-
-function earthRotation() {
-    if (isEarthHovered) {
-        earthSphere.rotation.y += 0.05;
-    }
-}
-
-// Function to switch Earth texture between day and night based on the time of day
-function updateEarthTexture() {
-    const now = new Date();
-    const hours = now.getHours();
-    const isDaytime = hours >= 6 && hours < 18;
-
-    if (isDaytime) {
-        earthSphere.material.map = earthDayTexture;
-    } else {
-        earthSphere.material.map = earthNightTexture;
-    }
-}
-
-
-
 
 const marsTexture = new THREE.TextureLoader().load('../images/mars_texture.jpg');
 const marsRadius = 0.5;
 const marsSegments = 32;
 const marsGeometry = new THREE.SphereGeometry(marsRadius, marsSegments, marsSegments);
 const marsMaterial = new THREE.MeshBasicMaterial({ map: marsTexture });
-const marsSphere = new THREE.Mesh(marsGeometry, marsMaterial);
+marsSphere = new THREE.Mesh(marsGeometry, marsMaterial);
 marsSphere.position.x = -3;
 scene.add(marsSphere);
-
-let isMarsHovered = false;
-
-document.addEventListener('mousemove', function (event) {
-    const mouse = {
-        x: (event.clientX / window.innerWidth) * 2 - 1,
-        y: -(event.clientY / window.innerHeight) * 2 + 1
-    };
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(marsSphere);
-
-    if (intersects.length > 0) {
-        isMarsHovered = true;
-    } else {
-        isMarsHovered = false;
-    }
-});
-
-function marsRotation() {
-    if (isMarsHovered) {
-        marsSphere.rotation.y += 0.05;
-    }
-}
-
 
 const moonTexture = new THREE.TextureLoader().load('../images/moon_texture.jpg');
 const moonRadius = 0.5;
 const moonSegments = 32;
 const moonGeometry = new THREE.SphereGeometry(moonRadius, moonSegments, moonSegments);
 const moonMaterial = new THREE.MeshBasicMaterial({ map: moonTexture });
-const moonSphere = new THREE.Mesh(moonGeometry, moonMaterial);
+moonSphere = new THREE.Mesh(moonGeometry, moonMaterial);
 moonSphere.position.x = 3;
 scene.add(moonSphere);
-
-
-let isMoonHovered = false;
-
-document.addEventListener('mousemove', function (event) {
-    const mouse = {
-        x: (event.clientX / window.innerWidth) * 2 - 1,
-        y: -(event.clientY / window.innerHeight) * 2 + 1
-    };
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(moonSphere);
-
-    if (intersects.length > 0) {
-        isMoonHovered = true;
-    } else {
-        isMoonHovered = false;
-    }
-});	
-
-function moonRotation() {
-    if (isMoonHovered) {
-        moonSphere.rotation.y += 0.05;
-    }
-}
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -157,37 +68,43 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-document.addEventListener('click', function (event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+document.addEventListener('mousemove', function (event) {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(marsSphere);
+    const intersectsEarth = raycaster.intersectObject(earthSphere);
+    const intersectsMars = raycaster.intersectObject(marsSphere);
+    const intersectsMoon = raycaster.intersectObject(moonSphere);
 
-    if (intersects.length > 0) {
-        window.open('mars_experience.html');
-    }
+    isEarthHovered = intersectsEarth.length > 0;
+    isMarsHovered = intersectsMars.length > 0;
+    isMoonHovered = intersectsMoon.length > 0;
 });
 
 document.addEventListener('click', function (event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObject(moonSphere);
-
-    if (intersects.length > 0) {
-        window.open('moon_experience.html');
+    if (isEarthHovered) {
+        window.open('earth_experience.html', '_blank');
+    } else if (isMarsHovered) {
+        window.open('mars_experience.html', '_blank');
+    } else if (isMoonHovered) {
+        window.open('moon_experience.html', '_blank');
     }
 });
+
+function scaleAndRotatePlanet(planetSphere, isHovered) {
+    const scaleFactor = isHovered ? 1.2 : 1; 
+    planetSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    planetSphere.rotation.y += 0.05;
+}
 
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    updateEarthTexture(); 
-    earthRotation();
-    moonRotation();
-	marsRotation();
+    scaleAndRotatePlanet(earthSphere, isEarthHovered);
+    scaleAndRotatePlanet(marsSphere, isMarsHovered);
+    scaleAndRotatePlanet(moonSphere, isMoonHovered);
     renderer.render(scene, camera);
 }
 

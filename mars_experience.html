@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mars Experience</title>
-        <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-        <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Experience</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    <!-- <script src="./js/mars_app.js"></script>  removed temporarily --> 
+</head>
 <body>
     <a-scene>
-        <!-- Mars 3D Model -->
         <a-entity gltf-model="./models/mars_exp.glb" scale="2 2 2" position="0 -20 -5"></a-entity>
         
-        <!-- Mars Rover 3D Model -->
         <a-entity gltf-model="./models/perseverance_rover.glb" scale="0.5 0.5 0.5" position="5 -1 -5"
             id="rover" class="interactive"></a-entity>
 
-        <a-camera position="0 1.6 0">
-        </a-camera>
+        <a-camera position="0 1.6 0"></a-camera>
     </a-scene>
-    <script src="./js/mars_app.js"></script>
+    
 </body>
 </html>
