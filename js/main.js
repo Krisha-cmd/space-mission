@@ -199,9 +199,9 @@ async function setupCamera() {
         const hand = predictions[0]; // Assuming you're tracking only one hand
         const indexFingerTip = hand.landmarks[8]; // Index finger tip landmark
         const [x, y] = indexFingerTip;
-
+        // console.log(x);
         // Check if the hand is moving inward (decreasing X-coordinate)
-        if (x < previousX) {
+        if (x+100 < previousX) {
             // Cycle through planets based on hand movement
             if (selectedPlanet === 'mars') {
                 selectedPlanet = 'earth';
@@ -223,8 +223,11 @@ async function setupCamera() {
             // Delay to prevent rapid selection on continuous hand movement
             setTimeout(() => {
                 previousX = x;
-            }, 1000); // Adjust the delay as needed
+            }, 2000); // Adjust the delay as needed
         }
+
+        // Update previousX for the next iteration
+        previousX = x;
     }
   
       requestAnimationFrame(() => detectHands(video, model));
