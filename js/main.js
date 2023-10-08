@@ -60,11 +60,6 @@ controls.enableDamping = true;
 
 camera.position.z = 5;
 
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(0, 0, -5);
-light.castShadow = true;
-scene.add(light);
-
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -72,6 +67,7 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 document.addEventListener('mousemove', function (event) {
+    if(!motionlock){
     const rect = canvas.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -83,9 +79,9 @@ document.addEventListener('mousemove', function (event) {
 
     isEarthHovered = intersectsEarth.length > 0;
     isMarsHovered = intersectsMars.length > 0;
-    isMoonHovered = intersectsMoon.length > 0;
+    isMoonHovered = intersectsMoon.length > 0;}
 });
-
+let motionlock=0;
 document.addEventListener('click', function (event) {
     if (isEarthHovered) {
         window.open('earth_experience.html', '_blank');
@@ -100,6 +96,8 @@ function scaleAndRotatePlanet(planetSphere, isHovered) {
     const scaleFactor = isHovered ? 1.2 : 1; 
     planetSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
     planetSphere.rotation.y += 0.05;
+    if(!isHovered)
+    planetSphere.rotation.y -= 0.05;
 }
 
 function animate() {
@@ -112,7 +110,6 @@ function animate() {
 }
 
 animate();
-
 let previousX=0;
 let selectedPlanet="earth";
 //handtracking
@@ -135,7 +132,11 @@ async function setupCamera() {
   async function loadHandposeModel() {
       return await handpose.load();
   }
-  
+
+//   let isEarthHovered1=1;
+//   let isMarsHovered1=0;
+//   let isMoonHovered1=0;
+
   async function detectHands(video, model) {
     const canvas1=document.querySelector("#canvas1");
       const context = canvas1.getContext('2d');
@@ -196,37 +197,37 @@ async function setupCamera() {
           }
       }
       if (predictions.length > 0) {
-        const hand = predictions[0]; // Assuming you're tracking only one hand
-        const indexFingerTip = hand.landmarks[8]; // Index finger tip landmark
+        const hand = predictions[0]; 
+        const indexFingerTip = hand.landmarks[8]; 
         const [x, y] = indexFingerTip;
-        // console.log(x);
-        // Check if the hand is moving inward (decreasing X-coordinate)
+
         if (x+100 < previousX) {
-            // Cycle through planets based on hand movement
+            motionlock=1;
             if (selectedPlanet === 'mars') {
                 selectedPlanet = 'earth';
-                console.log(selectedPlanet);
-                // Perform action for selecting Earth
-                //window.open('earth_experience.html', '_blank');
+                isEarthHovered=1;
+                isMarsHovered=0;
+                isMoonHovered=0;
+                scaleAndRotatePlanet(earthSphere,isEarthHovered)
             } else if (selectedPlanet === 'earth') {
                 selectedPlanet = 'moon';
-                console.log(selectedPlanet);
-                // Perform action for selecting Moon
-                //window.open('moon_experience.html', '_blank');
+                isEarthHovered=0;
+                isMarsHovered=0;
+                isMoonHovered=1;
+                scaleAndRotatePlanet(moonSphere,isMoonHovered)
             }
             else{
                 selectedPlanet = 'mars';
-                console.log(selectedPlanet);
+                isEarthHovered=0;
+                isMarsHovered=1;
+                isMoonHovered=0;
+                scaleAndRotatePlanet(marsSphere,isMarsHovered)
             }
-            // Add additional conditions for other planets if needed
 
-            // Delay to prevent rapid selection on continuous hand movement
             setTimeout(() => {
                 previousX = x;
-            }, 2000); // Adjust the delay as needed
+            }, 2000);
         }
-
-        // Update previousX for the next iteration
         previousX = x;
     }
   
